@@ -31,8 +31,21 @@ public_users.get('/isbn/:isbn',function (req, res) {
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const { author } = req.params;
+  const results = Object.keys(books).reduce((acc, isbn) => {
+    const book = books[isbn];
+    if (book.author && book.author.toLowerCase() === author.toLowerCase()) {
+        acc.push({ isbn, ...book }); // 回傳時把 ISBN 一併帶上較清楚
+    }
+    return acc;
+  }, []);
+  if (results.length === 0) {
+    return res.status(404).json({ message: `No books found for author "${author}"` });
+  }
+  const pretty = JSON.stringify(results, null, 2);
+  res.set('Content-Type', 'application/json');
+  return res.status(200).send(pretty);
+
 });
 
 // Get all books based on title
